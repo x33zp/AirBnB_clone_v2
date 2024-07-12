@@ -1,51 +1,56 @@
 #!/usr/bin/python3
-"""Fabric script that distributes an archive to the web server
+"""Compress web static package
 """
-from fabric.api import env, run, put
+from fabric.api import *
+from datetime import datetime
 from os import path
 
+
+env.hosts = ['100.25.19.204', '54.157.159.85']
 env.user = 'ubuntu'
-env.hosts = ['100.25.180.67', '54.210.195.91']
+env.key_filename = '~/.ssh/id_rsa'
 
 
 def do_deploy(archive_path):
-    """A script that distributes an archive"""
-    if not (path.exists(archive_path)):
-        return False
+        """Deploy web files to server
+        """
+        try:
+                if not (path.exists(archive_path)):
+                        return False
 
-    try:
-        archive_file = archive_path.split('/')[1]
-        file_name = archive_file.split('.')[0]
+                # upload archive
+                put(archive_path, '/tmp/')
 
-        # Upload the archive file
-        put(archive_path, '/tmp/{}'.format(archive_file))
+                # create target dir
+                timestamp = archive_path[-18:-4]
+                run('sudo mkdir -p /data/web_static/\
+releases/web_static_{}/'.format(timestamp))
 
-        # Create the folder where the archive will be uncompressed
-        run('sudo mkdir -p /data/web_static/releases/{}'.format(file_name))
+                # uncompress archive and delete .tgz
+                run('sudo tar -xzf /tmp/web_static_{}.tgz -C \
+/data/web_static/releases/web_static_{}/'
+                    .format(timestamp, timestamp))
 
-        # Uncompress the archive to the folder 'file_name'
-        run('sudo tar -xzf /tmp/{} -C /data/web_static/releases/{}'
-            .format(archive_file, file_name))
+                # remove archive
+                run('sudo rm /tmp/web_static_{}.tgz'.format(timestamp))
 
-        # Delete the archive from the web server
-        run('sudo rm /tmp/{}'.format(archive_file))
+                # move contents into host web_static
+                run('sudo mv /data/web_static/releases/web_static_{}/web_static/* \
+/data/web_static/releases/web_static_{}/'.format(timestamp, timestamp))
 
-        # move contents into host web_static
-        run('sudo mv /data/web_static/releases/{}/web_static/*\
-                /data/web_static/releases/{}/'.format(file_name, file_name))
+                # remove extraneous web_static dir
+                run('sudo rm -rf /data/web_static/releases/\
+web_static_{}/web_static'
+                    .format(timestamp))
 
-        # remove extraneous web_static dir
-        run('sudo rm -rf /data/web_static/releases/{}/web_static'
-            .format(file_name))
+                # delete pre-existing sym link
+                run('sudo rm -rf /data/web_static/current')
 
-        # Delete the symbolic link /data/web_static/current from the web server
-        run('sudo rm -rf /data/web_static/current')
+                # re-establish symbolic link
+                run('sudo ln -s /data/web_static/releases/\
+web_static_{}/ /data/web_static/current'.format(timestamp))
+        except:
+                return False
 
-        # Create a new the symbolic link
-        run('sudo ln -s /data/web_static/releases/web_static_20170315003959/\
-                /data/web_static/current')
-
+        # return True on success
         return True
-
-    except Exception as e:
-        return False

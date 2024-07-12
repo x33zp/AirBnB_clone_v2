@@ -27,18 +27,18 @@ def do_pack():
 def do_deploy(archive_path):
     """A script that distributes an archive"""
 
-    if not (path.exists(archive_path)):
-        return False
-
     try:
-        archive_file = archive_path.split('/')[1]
-        file_name = archive_path.split('.')[0]
+        if not (path.exists(archive_path)):
+            return False
 
-        # Upload the archive to the /tmp/ directory of the web server
-        put(archive_file, '/tmp/')
+        archive_file = archive_path.split('/')[1]
+        file_name = archive_file.split('.')[0]
+
+        # Upload the archive file
+        put(archive_path, '/tmp/{}'.format(archive_file))
 
         # Create the folder where the archive will be uncompressed
-        run('sudo mkdir -p /data/web_static/releases/{}'.format(archive_file))
+        run('sudo mkdir -p /data/web_static/releases/{}'.format(file_name))
 
         # Uncompress the archive to the folder 'file_name'
         run('sudo tar -xzf /tmp/{} -C /data/web_static/releases/{}'

@@ -1,36 +1,19 @@
 #!/usr/bin/python3
-from fabric.api import local, env, run, put
-from time import strftime
-from datetime import date
+"""Fabric script that distributes an archive to the web server
+"""
+from fabric.api import env, run, put
 from os import path
 
 env.user = 'ubuntu'
 env.hosts = ['100.25.180.67', '54.210.195.91']
 
 
-def do_pack():
-    """A script that generates archive the contents of web_static folder"""
-
-    dt = strftime("%Y%m%d%H%M%S")
-    file_name = "versions/web_static_{}.tgz".format(dt)
-
-    try:
-        local("mkdir -p versions")
-        local("tar -czvf {} web_static".format(file_name))
-
-        return file_name
-
-    except Exception as e:
-        return None
-
-
 def do_deploy(archive_path):
     """A script that distributes an archive"""
+    if not (path.exists(archive_path)):
+        return False
 
     try:
-        if not (path.exists(archive_path)):
-            return False
-
         archive_file = archive_path.split('/')[1]
         file_name = archive_file.split('.')[0]
 

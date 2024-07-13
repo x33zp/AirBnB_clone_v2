@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 """Fabric script that distributes an archive to the web server
 """
-from fabric.api import env, put, run
-from os import path                                                                                                                                                                                                                                                                                                                                                     env.user = 'ubuntu'                                                                                                                                                                 env.hosts = ['100.25.180.67', '54.210.195.91'] 
+from fabric.api import *
+from os import path
+
+env.user = 'ubuntu'
+env.hosts = ['100.25.180.67', '54.210.195.91']
 
 
 def do_deploy(archive_path):

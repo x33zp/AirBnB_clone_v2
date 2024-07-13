@@ -25,6 +25,7 @@ def do_pack():
     except Exception as e:
         return None
 
+
 def do_deploy(archive_path):
     """A script that distributes an archive"""
     try:
@@ -65,6 +66,7 @@ def do_deploy(archive_path):
     except Exception:
         print("New version not deployed!")
         return False
+
 
 def deploy():
     """Automation"""

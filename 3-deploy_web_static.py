@@ -72,9 +72,9 @@ def do_deploy(archive_path):
 
 def deploy():
     """Automation"""
-    archive = do_pack()
+    archive_path = do_pack()
 
-    if archive is None:
+    if archive_path is None:
         return False
 
-    return do_deploy(archive)
+    return do_deploy(archive_path)

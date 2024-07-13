@@ -10,9 +10,6 @@ env.hosts = ['100.25.180.67', '54.210.195.91']
 
 def do_deploy(archive_path):
     """A script that distributes an archive"""
-    if not (path.exists(archive_path)):
-        return False
-
     try:
         archive_file = archive_path.split('/')[1]
         file_name = archive_file.split('.')[0]
@@ -21,31 +18,33 @@ def do_deploy(archive_path):
         put(archive_path, '/tmp/{}'.format(archive_file))
 
         # Create the folder where the archive will be uncompressed
-        run('sudo mkdir -p /data/web_static/releases/{}'.format(file_name))
+        run('mkdir -p /data/web_static/releases/{}'.format(file_name))
 
         # Uncompress the archive to the folder 'file_name'
-        run('sudo tar -xzf /tmp/{} -C /data/web_static/releases/{}'
+        run('tar -xzf /tmp/{} -C /data/web_static/releases/{}'
             .format(archive_file, file_name))
 
         # Delete the archive from the web server
-        run('sudo rm /tmp/{}'.format(archive_file))
+        run('rm /tmp/{}'.format(archive_file))
 
         # move contents into host web_static
-        run('sudo mv /data/web_static/releases/{}/web_static/*\
+        run('mv /data/web_static/releases/{}/web_static/*\
                 /data/web_static/releases/{}/'.format(file_name, file_name))
 
         # remove extraneous web_static dir
-        run('sudo rm -rf /data/web_static/releases/{}/web_static'
+        run('rm -rf /data/web_static/releases/{}/web_static'
             .format(file_name))
 
         # Delete the symbolic link /data/web_static/current from the web server
-        run('sudo rm -rf /data/web_static/current')
+        run('rm -rf /data/web_static/current')
 
         # Create a new the symbolic link
-        run('sudo ln -s /data/web_static/releases/web_static_20170315003959/\
-                /data/web_static/current')
+        run('ln -s /data/web_static/releases/{}/\
+                /data/web_static/current'.format(file_name))
 
+        print("New version deployed!")
         return True
 
-    except Exception as e:
+    except Exception:
+        print("New version not deployed!")
         return False

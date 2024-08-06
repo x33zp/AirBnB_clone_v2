@@ -12,9 +12,8 @@ from sqlalchemy.orm import relationship
 
 class Amenity(BaseModel, Base):
     """This class represents Amenity."""
-    if os.getenv('HBNB_TYPE_STORAGE') == 'db':
-        __tablename__ = 'amenities'
+    __tablename__ = 'amenities'
 
-        name = Column(String(128), nullable=False)
-        place_amenities = relationship('Place', secondary='place_amenity',
+    name = Column(String(128), nullable=False)
+    place_amenities = relationship('Place', secondary='place_amenity',
                                        viewonly=False)

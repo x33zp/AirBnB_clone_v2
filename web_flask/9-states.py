@@ -14,6 +14,7 @@ def states():
     states = storage.all(State)
     return render_template('9-states.html', state=states)
 
+
 @app.route("/states/<id>", strict_slashes=False)
 def states_id(id):
     """Displays list of States with info about 'id' if it's present"""
